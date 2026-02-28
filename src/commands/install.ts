@@ -84,12 +84,37 @@ function resolveInstallSource(source: string | undefined): string {
   return direct || DEFAULT_INSTALL_SOURCE;
 }
 
+function normalizeSkillSelector(value: string): string {
+  return value.trim().replace(/^\.\/+/, '').replace(/^\/+|\/+$/g, '').toLowerCase();
+}
+
+function skillMatchesSelector(
+  selector: string,
+  info: { skillName: string; relativePath: string }
+): boolean {
+  const rel = info.relativePath.replaceAll('\\', '/');
+  const relNoSkillsPrefix = rel.startsWith('skills/') ? rel.slice('skills/'.length) : rel;
+  const candidates = [
+    info.skillName,
+    rel,
+    relNoSkillsPrefix,
+  ]
+    .filter(Boolean)
+    .map((candidate) => normalizeSkillSelector(candidate));
+
+  return candidates.includes(selector);
+}
+
 /**
  * Install skill from local path, GitHub, or Git URL
  */
 export async function installSkill(source: string | undefined, options: InstallOptions): Promise<void> {
   if (options.universal && options.claude) {
     console.error(chalk.red('Error: --universal and --claude cannot be used together'));
+    process.exit(1);
+  }
+  if (options.skill !== undefined && options.skill.trim() === '') {
+    console.error(chalk.red('Error: --skill requires a non-empty value'));
     process.exit(1);
   }
 
@@ -159,6 +184,14 @@ export async function installSkill(source: string | undefined, options: InstallO
     }
   }
 
+  if (skillSubpath && options.skill) {
+    console.error(chalk.red('Error: Do not use path-in-source and --skill together'));
+    console.error(chalk.dim('Use one of:'));
+    console.error(chalk.dim('  1) owner/repo/path/to/skill'));
+    console.error(chalk.dim('  2) owner/repo --skill <skill-name-or-path>'));
+    process.exit(1);
+  }
+
   // Clone and install from git
   const tempDir = join(homedir(), `.openskills-temp-${Date.now()}`);
   mkdirSync(tempDir, { recursive: true });
@@ -204,9 +237,9 @@ export async function installSkill(source: string | undefined, options: InstallO
  * Print post-install hints
  */
 function printPostInstallHints(isProject: boolean): void {
-  console.log(`\n${chalk.dim('Read skill:')} ${chalk.cyan('npx openskills read <skill-name>')}`);
+  console.log(`\n${chalk.dim('Read skill:')} ${chalk.cyan('npx @team/openskills read <skill-name>')}`);
   if (isProject) {
-    console.log(`${chalk.dim('Sync to AGENTS.md:')} ${chalk.cyan('npx openskills sync')}`);
+    console.log(`${chalk.dim('Sync to AGENTS.md:')} ${chalk.cyan('npx @team/openskills sync')}`);
   }
 }
 
@@ -233,6 +266,16 @@ async function installFromLocal(
   // Check if this is a single skill (has SKILL.md) or a directory of skills
   const skillMdPath = join(localPath, 'SKILL.md');
   if (existsSync(skillMdPath)) {
+    if (options.skill) {
+      const requested = normalizeSkillSelector(options.skill);
+      const localSkill = normalizeSkillSelector(basename(localPath));
+      if (requested !== localSkill) {
+        console.error(
+          chalk.red(`Error: --skill '${options.skill}' does not match local skill '${basename(localPath)}'`)
+        );
+        process.exit(1);
+      }
+    }
     // Single skill directory
     const isProject = targetDir.includes(process.cwd());
     await installSingleLocalSkill(localPath, targetDir, isProject, options, sourceInfo);
@@ -349,6 +392,7 @@ async function installFromRepo(
     description: string;
     targetPath: string;
     size: number;
+    relativePath: string;
   }> = [];
 
   if (existsSync(rootSkillPath)) {
@@ -367,6 +411,7 @@ async function installFromRepo(
         description: extractYamlField(content, 'description'),
         targetPath: join(targetDir, skillName),
         size: getDirectorySize(repoDir),
+        relativePath: '',
       },
     ];
   }
@@ -410,6 +455,7 @@ async function installFromRepo(
         const skillName = basename(skillDir);
         const description = extractYamlField(content, 'description');
         const targetPath = join(targetDir, skillName);
+        const relativePath = relative(repoDir, skillDir).replaceAll('\\', '/');
 
         // Get size
         const size = getDirectorySize(skillDir);
@@ -420,6 +466,7 @@ async function installFromRepo(
           description,
           targetPath,
           size,
+          relativePath,
         };
       })
       .filter((info) => info !== null) as Array<{
@@ -428,6 +475,7 @@ async function installFromRepo(
       description: string;
       targetPath: string;
       size: number;
+      relativePath: string;
     }>;
 
     if (skillInfos.length === 0) {
@@ -441,7 +489,36 @@ async function installFromRepo(
   // Interactive selection (unless -y flag or single skill)
   let skillsToInstall = skillInfos;
 
-  if (!options.yes && skillInfos.length > 1) {
+  if (options.skill) {
+    const selector = normalizeSkillSelector(options.skill);
+    const matches = skillInfos.filter((info) => skillMatchesSelector(selector, info));
+
+    if (matches.length === 0) {
+      const examples = skillInfos
+        .slice(0, 10)
+        .map((info) => `- ${info.skillName}${info.relativePath ? ` (${info.relativePath})` : ''}`)
+        .join('\n');
+      console.error(chalk.red(`Error: Skill not found for selector '${options.skill}'`));
+      console.error(chalk.dim(`Try one of these:\n${examples}`));
+      process.exit(1);
+    }
+
+    if (matches.length > 1) {
+      const candidates = matches
+        .map((info) => `- ${info.skillName}${info.relativePath ? ` (${info.relativePath})` : ''}`)
+        .join('\n');
+      console.error(chalk.red(`Error: Selector '${options.skill}' is ambiguous`));
+      console.error(chalk.dim(`Matched:\n${candidates}`));
+      process.exit(1);
+    }
+
+    skillsToInstall = matches;
+    const matched = matches[0];
+    const matchedLabel = matched.relativePath || matched.skillName;
+    console.log(chalk.dim(`Installing selected skill: ${matchedLabel}\n`));
+  }
+
+  if (!options.skill && !options.yes && skillInfos.length > 1) {
     try {
       const choices = skillInfos.map((info) => ({
         name: `${chalk.bold(info.skillName.padEnd(25))} ${chalk.dim(formatSize(info.size))}`,

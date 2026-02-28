@@ -48,6 +48,7 @@ program
   .option('-u, --universal', 'Install to .agent/skills/ (default)')
   .option('-c, --claude', 'Install to .claude/skills/ (legacy location)')
   .option('-y, --yes', 'Skip interactive selection, install all skills found')
+  .option('-s, --skill <name-or-path>', 'Install a single skill by name/path from the source repo')
   .action(installSkill);
 
 program

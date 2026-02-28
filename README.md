@@ -9,8 +9,8 @@
 
 One CLI. Every agent. Same format as Claude Code.
 
-[![npm version](https://img.shields.io/npm/v/openskills.svg)](https://www.npmjs.com/package/openskills)
-[![npm downloads](https://img.shields.io/npm/dm/openskills.svg)](https://www.npmjs.com/package/openskills)
+[![npm version](https://img.shields.io/npm/v/%40team%2Fopenskills.svg)](https://www.npmjs.com/package/@team/openskills)
+[![npm downloads](https://img.shields.io/npm/dm/%40team%2Fopenskills.svg)](https://www.npmjs.com/package/@team/openskills)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 [Quick Start](#-quick-start) · [How It Works](#-how-it-works) · [Commands](#-commands) · [Create Skills](#-creating-your-own-skills) · [FAQ](#-faq)
@@ -30,8 +30,8 @@ OpenSkills brings **Anthropic's skills system** to every AI coding agent — Cla
 ## 🚀 Quick Start
 
 ```bash
-npx openskills install anthropics/skills
-npx openskills sync
+npx @team/openskills install anthropics/skills
+npx @team/openskills sync
 ```
 
 By default, installs are project-local (`./.agent/skills`). Use `--global` for `~/.agent/skills`, or `--claude` to use legacy `.claude/skills`.
@@ -69,7 +69,7 @@ Claude Code ships skills as **SKILL.md files** and exposes them inside a `<avail
 OpenSkills generates the **exact same `<available_skills>` XML** in your `AGENTS.md` and loads skills via:
 
 ```bash
-npx openskills read <skill-name>
+npx @team/openskills read <skill-name>
 ```
 
 So any agent that can read `AGENTS.md` can use Claude Code skills without needing Claude Code itself.
@@ -80,7 +80,7 @@ So any agent that can read `AGENTS.md` can use Claude Code skills without needin
 |--------|-------------|------------|
 | **Prompt Format** | `<available_skills>` XML | Same XML | 
 | **Skill Storage** | `.claude/skills/` | `.agent/skills/` (default, supports `.claude/skills/`) | 
-| **Invocation** | `Skill("name")` tool | `npx openskills read <name>` | 
+| **Invocation** | `Skill("name")` tool | `npx @team/openskills read <name>` | 
 | **Marketplace** | Anthropic marketplace | GitHub (anthropics/skills) | 
 | **Progressive Disclosure** | ✅ | ✅ |
 
@@ -97,7 +97,7 @@ So any agent that can read `AGENTS.md` can use Claude Code skills without needin
 When users ask you to perform tasks, check if any of the available skills below can help complete the task more effectively.
 
 How to use skills:
-- Invoke: `npx openskills read <skill-name>` (run in your shell)
+- Invoke: `npx @team/openskills read <skill-name>` (run in your shell)
 - The skill content will load with detailed instructions
 - Base directory provided in output for resolving bundled resources
 
@@ -129,25 +129,31 @@ Usage notes:
 ### From Anthropic Marketplace
 
 ```bash
-npx openskills install anthropics/skills
+npx @team/openskills install anthropics/skills
 ```
 
 ### From Any GitHub Repo
 
 ```bash
-npx openskills install your-org/your-skills
+npx @team/openskills install your-org/your-skills
+```
+
+### Install a Single Skill From a Repo
+
+```bash
+npx @team/openskills install your-org/your-skills --skill skill-name
 ```
 
 ### From a Local Path
 
 ```bash
-npx openskills install ./local-skills/my-skill
+npx @team/openskills install ./local-skills/my-skill
 ```
 
 ### From Private Git Repos
 
 ```bash
-npx openskills install git@github.com:your-org/private-skills.git
+npx @team/openskills install git@github.com:your-org/private-skills.git
 ```
 
 ---
@@ -167,14 +173,14 @@ OpenSkills now installs to `.agent/skills/` by default. This is the recommended 
 ## 🧰 Commands
 
 ```bash
-npx openskills install <source> [options]  # Install from GitHub, local path, or private repo
-npx openskills install [options]           # Install using built-in default source
-npx openskills sync [-y] [-o <path>]       # Update AGENTS.md (or custom output)
-npx openskills list                        # Show installed skills
-npx openskills read <name>                 # Load skill (for agents)
-npx openskills update [name...]            # Update installed skills (default: all)
-npx openskills manage                      # Remove skills (interactive)
-npx openskills remove <name>               # Remove specific skill
+npx @team/openskills install <source> [options]  # Install from GitHub, local path, or private repo
+npx @team/openskills install [options]           # Install using built-in default source
+npx @team/openskills sync [-y] [-o <path>]       # Update AGENTS.md (or custom output)
+npx @team/openskills list                        # Show installed skills
+npx @team/openskills read <name>                 # Load skill (for agents)
+npx @team/openskills update [name...]            # Update installed skills (default: all)
+npx @team/openskills manage                      # Remove skills (interactive)
+npx @team/openskills remove <name>               # Remove specific skill
 ```
 
 ### Flags
@@ -183,6 +189,7 @@ npx openskills remove <name>               # Remove specific skill
 - `--universal` — Install to `.agent/skills/` (default; kept for compatibility)
 - `--claude` — Install to `.claude/skills/` (legacy location)
 - `-y, --yes` — Skip prompts (useful for CI)
+- `-s, --skill <name-or-path>` — Install only one skill by name/path from the source repo
 - `-o, --output <path>` — Output file for sync (default: `AGENTS.md`)
 
 ---
@@ -231,7 +238,7 @@ my-skill/
 Install your own skill:
 
 ```bash
-npx openskills install ./my-skill
+npx @team/openskills install ./my-skill
 ```
 
 ### Local Development with Symlinks
@@ -245,8 +252,8 @@ ln -s ~/dev/my-skills/my-skill .agent/skills/my-skill
 ### Authoring Guide
 
 ```bash
-npx openskills install anthropics/skills
-npx openskills read skill-creator
+npx @team/openskills install anthropics/skills
+npx @team/openskills read skill-creator
 ```
 
 ---
@@ -256,13 +263,13 @@ npx openskills read skill-creator
 If you installed skills from a git repo, you can refresh them anytime:
 
 ```bash
-npx openskills update
+npx @team/openskills update
 ```
 
 To update specific skills, pass a comma-separated list:
 
 ```bash
-npx openskills update git-workflow,check-branch-first
+npx @team/openskills update git-workflow,check-branch-first
 ```
 
 If a skill was installed before updates were tracked, re-install it once to record its source.
@@ -272,7 +279,7 @@ If a skill was installed before updates were tracked, re-install it once to reco
 ## ✅ Tips
 
 - You can always run OpenSkills via `npx`; a global install is optional.
-- For multiple reads, prefer comma-separated names: `npx openskills read foo,bar`.
+- For multiple reads, prefer comma-separated names: `npx @team/openskills read foo,bar`.
 
 ---
 

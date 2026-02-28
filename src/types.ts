@@ -16,6 +16,7 @@ export interface InstallOptions {
   universal?: boolean;
   claude?: boolean;
   yes?: boolean;
+  skill?: string;
 }
 
 export interface SkillMetadata {

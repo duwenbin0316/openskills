@@ -1,5 +1,5 @@
 {
-  "name": "openskills",
+  "name": "@team/openskills",
   "version": "1.5.0",
   "description": "Universal skills loader for AI coding agents - install and load Anthropic SKILL.md format skills in any agent",
   "type": "module",

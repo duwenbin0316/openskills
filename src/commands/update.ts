@@ -18,8 +18,8 @@ export async function updateSkills(skillNames: string[] | string | undefined): P
   if (skills.length === 0) {
     console.log('No skills installed.\n');
     console.log('Install skills:');
-    console.log(`  ${chalk.cyan('npx openskills install anthropics/skills')}         ${chalk.dim('# Project (default)')}`);
-    console.log(`  ${chalk.cyan('npx openskills install owner/skill --global')}     ${chalk.dim('# Global (advanced)')}`);
+    console.log(`  ${chalk.cyan('npx @team/openskills install anthropics/skills')}         ${chalk.dim('# Project (default)')}`);
+    console.log(`  ${chalk.cyan('npx @team/openskills install owner/skill --global')}     ${chalk.dim('# Global (advanced)')}`);
     return;
   }
 
@@ -129,7 +129,7 @@ export async function updateSkills(skillNames: string[] | string | undefined): P
 
   if (missingMetadata.length > 0) {
     console.log(chalk.yellow(`Missing source metadata (${missingMetadata.length}): ${missingMetadata.join(', ')}`));
-    console.log(chalk.dim('Re-install these skills once to enable updates (e.g., `npx openskills install <source>`).'));
+    console.log(chalk.dim('Re-install these skills once to enable updates (e.g., `npx @team/openskills install <source>`).'));
   }
   if (missingLocalSource.length > 0) {
     console.log(chalk.yellow(`Local source missing (${missingLocalSource.length}): ${missingLocalSource.join(', ')}`));
