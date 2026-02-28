@@ -19,6 +19,8 @@ interface InstallSourceInfo {
   localRoot?: string;
 }
 
+const DEFAULT_INSTALL_SOURCE = 'git@github.com:duwenbin0316/skills-repo.git';
+
 /**
  * Check if source is a local path
  */
@@ -77,14 +79,25 @@ function isPathInside(targetPath: string, targetDir: string): boolean {
   return resolvedTargetPath.startsWith(resolvedTargetDirWithSep);
 }
 
+function resolveInstallSource(source: string | undefined): string {
+  const direct = source?.trim();
+  return direct || DEFAULT_INSTALL_SOURCE;
+}
+
 /**
  * Install skill from local path, GitHub, or Git URL
  */
-export async function installSkill(source: string, options: InstallOptions): Promise<void> {
+export async function installSkill(source: string | undefined, options: InstallOptions): Promise<void> {
   if (options.universal && options.claude) {
     console.error(chalk.red('Error: --universal and --claude cannot be used together'));
     process.exit(1);
   }
+
+  const installSource = resolveInstallSource(source);
+  if (!source) {
+    console.log(chalk.dim(`Using default source: ${installSource}`));
+  }
+
   const folder = options.claude ? '.claude/skills' : '.agent/skills';
   const isProject = !options.global; // Default to project unless --global specified
   const targetDir = isProject
@@ -98,7 +111,7 @@ export async function installSkill(source: string, options: InstallOptions): Pro
   const projectLocation = `./${folder}`;
   const globalLocation = `~/${folder}`;
 
-  console.log(`Installing from: ${chalk.cyan(source)}`);
+  console.log(`Installing from: ${chalk.cyan(installSource)}`);
   console.log(`Location: ${location}`);
   if (isProject) {
     console.log(
@@ -112,10 +125,10 @@ export async function installSkill(source: string, options: InstallOptions): Pro
   console.log('');
 
   // Handle local path installation
-  if (isLocalPath(source)) {
-    const localPath = expandPath(source);
+  if (isLocalPath(installSource)) {
+    const localPath = expandPath(installSource);
     const sourceInfo: InstallSourceInfo = {
-      source,
+      source: installSource,
       sourceType: 'local',
       localRoot: localPath,
     };
@@ -128,14 +141,14 @@ export async function installSkill(source: string, options: InstallOptions): Pro
   let repoUrl: string;
   let skillSubpath: string = '';
 
-  if (isGitUrl(source)) {
+  if (isGitUrl(installSource)) {
     // Full git URL (SSH, HTTPS, git://)
-    repoUrl = source;
+    repoUrl = installSource;
   } else {
     // GitHub shorthand: owner/repo or owner/repo/skill-path
-    const parts = source.split('/');
+    const parts = installSource.split('/');
     if (parts.length === 2) {
-      repoUrl = `https://github.com/${source}`;
+      repoUrl = `https://github.com/${installSource}`;
     } else if (parts.length > 2) {
       repoUrl = `https://github.com/${parts[0]}/${parts[1]}`;
       skillSubpath = parts.slice(2).join('/');
@@ -150,7 +163,7 @@ export async function installSkill(source: string, options: InstallOptions): Pro
   const tempDir = join(homedir(), `.openskills-temp-${Date.now()}`);
   mkdirSync(tempDir, { recursive: true });
   const sourceInfo: InstallSourceInfo = {
-    source,
+    source: installSource,
     sourceType: 'git',
     repoUrl,
   };

@@ -42,8 +42,8 @@ program
   .action(listSkills);
 
 program
-  .command('install <source>')
-  .description('Install skill from GitHub or Git URL')
+  .command('install [source]')
+  .description('Install skill from source or built-in default source')
   .option('-g, --global', 'Install globally (default: project install)')
   .option('-u, --universal', 'Install to .agent/skills/ (default)')
   .option('-c, --claude', 'Install to .claude/skills/ (legacy location)')

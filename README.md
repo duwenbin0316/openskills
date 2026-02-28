@@ -168,6 +168,7 @@ OpenSkills now installs to `.agent/skills/` by default. This is the recommended 
 
 ```bash
 npx openskills install <source> [options]  # Install from GitHub, local path, or private repo
+npx openskills install [options]           # Install using built-in default source
 npx openskills sync [-y] [-o <path>]       # Update AGENTS.md (or custom output)
 npx openskills list                        # Show installed skills
 npx openskills read <name>                 # Load skill (for agents)
