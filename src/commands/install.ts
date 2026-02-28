@@ -434,7 +434,7 @@ async function installFromRepo(
         name: `${chalk.bold(info.skillName.padEnd(25))} ${chalk.dim(formatSize(info.size))}`,
         value: info.skillName,
         description: info.description.slice(0, 80),
-        checked: true, // Check all by default
+        checked: false, // Unchecked by default, users opt in with space
       }));
 
       const selected = await checkbox({
