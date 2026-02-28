@@ -45,7 +45,8 @@ program
   .command('install <source>')
   .description('Install skill from GitHub or Git URL')
   .option('-g, --global', 'Install globally (default: project install)')
-  .option('-u, --universal', 'Install to .agent/skills/ (for universal AGENTS.md usage)')
+  .option('-u, --universal', 'Install to .agent/skills/ (default)')
+  .option('-c, --claude', 'Install to .claude/skills/ (legacy location)')
   .option('-y, --yes', 'Skip interactive selection, install all skills found')
   .action(installSkill);
 

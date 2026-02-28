@@ -57,7 +57,7 @@ describe('End-to-end CLI tests', () => {
   describe('openskills list', () => {
     it('should list installed skills', () => {
       // Create a project skills directory with a skill
-      const skillsDir = join(testTempDir, '.claude', 'skills');
+      const skillsDir = join(testTempDir, '.agent', 'skills');
       createTestSkill(skillsDir, 'test-skill', 'A test skill');
 
       const result = runCli('list');
@@ -162,7 +162,7 @@ describe('End-to-end CLI tests', () => {
       expect(result.stdout).toContain('Installed');
 
       // Verify skill was copied
-      const installedPath = join(testTempDir, '.claude', 'skills', 'local-skill', 'SKILL.md');
+      const installedPath = join(testTempDir, '.agent', 'skills', 'local-skill', 'SKILL.md');
       expect(existsSync(installedPath)).toBe(true);
     });
 
@@ -189,7 +189,7 @@ describe('End-to-end CLI tests', () => {
 
   describe('openskills remove', () => {
     it('should remove installed skill', () => {
-      const skillsDir = join(testTempDir, '.claude', 'skills');
+      const skillsDir = join(testTempDir, '.agent', 'skills');
       createTestSkill(skillsDir, 'removable-skill', 'To be removed');
 
       const result = runCli('remove removable-skill');
@@ -247,7 +247,7 @@ describe('End-to-end CLI tests', () => {
   describe('--yes flag behavior', () => {
     it('should auto-overwrite with -y flag', () => {
       // Create initial skill
-      const skillsDir = join(testTempDir, '.claude', 'skills');
+      const skillsDir = join(testTempDir, '.agent', 'skills');
       createTestSkill(skillsDir, 'overwrite-skill', 'Original');
 
       // Create source skill to install

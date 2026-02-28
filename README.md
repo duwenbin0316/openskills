@@ -34,7 +34,7 @@ npx openskills install anthropics/skills
 npx openskills sync
 ```
 
-By default, installs are project-local (`./.claude/skills`, or `./.agent/skills` with `--universal`). Use `--global` for `~/.claude/skills`.
+By default, installs are project-local (`./.agent/skills`). Use `--global` for `~/.agent/skills`, or `--claude` to use legacy `.claude/skills`.
 
 ---
 
@@ -79,7 +79,7 @@ So any agent that can read `AGENTS.md` can use Claude Code skills without needin
 | Aspect | Claude Code | OpenSkills |
 |--------|-------------|------------|
 | **Prompt Format** | `<available_skills>` XML | Same XML | 
-| **Skill Storage** | `.claude/skills/` | `.claude/skills/` (default) | 
+| **Skill Storage** | `.claude/skills/` | `.agent/skills/` (default, supports `.claude/skills/`) | 
 | **Invocation** | `Skill("name")` tool | `npx openskills read <name>` | 
 | **Marketplace** | Anthropic marketplace | GitHub (anthropics/skills) | 
 | **Progressive Disclosure** | ✅ | ✅ |
@@ -154,11 +154,7 @@ npx openskills install git@github.com:your-org/private-skills.git
 
 ## 🌍 Universal Mode (Multi-Agent Setups)
 
-If you use Claude Code **and** other agents with one `AGENTS.md`, install to `.agent/skills/` to avoid conflicts with Claude's plugin marketplace:
-
-```bash
-npx openskills install anthropics/skills --universal
-```
+OpenSkills now installs to `.agent/skills/` by default. This is the recommended path for shared `AGENTS.md` setups across multiple agents.
 
 **Priority order (highest wins):**
 1. `./.agent/skills/`
@@ -182,8 +178,9 @@ npx openskills remove <name>               # Remove specific skill
 
 ### Flags
 
-- `--global` — Install globally to `~/.claude/skills` (default: project install)
-- `--universal` — Install to `.agent/skills/` instead of `.claude/skills/`
+- `--global` — Install globally to `~/.agent/skills` (default: project install)
+- `--universal` — Install to `.agent/skills/` (default; kept for compatibility)
+- `--claude` — Install to `.claude/skills/` (legacy location)
 - `-y, --yes` — Skip prompts (useful for CI)
 - `-o, --output <path>` — Output file for sync (default: `AGENTS.md`)
 
@@ -240,8 +237,8 @@ npx openskills install ./my-skill
 
 ```bash
 git clone git@github.com:your-org/my-skills.git ~/dev/my-skills
-mkdir -p .claude/skills
-ln -s ~/dev/my-skills/my-skill .claude/skills/my-skill
+mkdir -p .agent/skills
+ln -s ~/dev/my-skills/my-skill .agent/skills/my-skill
 ```
 
 ### Authoring Guide
